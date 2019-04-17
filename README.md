@@ -52,7 +52,7 @@ To start a cross device recording, the asynchronous recording functionality can 
 
 ```javascript
 let output = await Kiku.startRecording('otherDeviceName', // Other device's name to also record a buffer on
-                                       secondsFromNow); // Miliseconds from now to start recording
+                                       secondsFromNow);   // Miliseconds from now to start recording
 ```
 
 The `output` object will then contain both devices recorded buffers, as well as the estimated recording offset and an average network delay (all in miliseconds).
