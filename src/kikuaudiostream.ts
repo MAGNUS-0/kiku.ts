@@ -152,6 +152,9 @@ export class KikuAudioStream {
      */
     public static async recordAt (time: number, duration: number) {
 
+        // Reset buffer before attempting to record
+        KikuAudioStream.clearAudioBuffer();
+
         // Estimate execution time
         let eta_ms = time - KikuAudioStream.currentTime();
         console.log('Starting to record in ' + eta_ms + ' from now (' + eta_ms/1000 + ')');
@@ -226,5 +229,9 @@ export class KikuAudioStream {
      */
     private static currentTime () : number {
         return performance.timing.navigationStart + performance.now();
+    }
+
+    public static clearAudioBuffer () {
+        KikuAudioStream.resetAudioBuffer = true;
     }
 }
