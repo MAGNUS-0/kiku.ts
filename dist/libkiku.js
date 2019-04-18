@@ -479,6 +479,7 @@ class KikuAudioStream {
      * @public
      */
     static setup() {
+        KikuAudioStream.audioContext = new AudioContext() || window.webkitAudioContext();
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             console.log('getUserMedia supported.');
             navigator.mediaDevices.getUserMedia({
@@ -548,8 +549,8 @@ class KikuAudioStream {
         KikuAudioStream.supported = true;
         this.micRecorder = new MediaRecorder(stream);
         // Create live audio context processing
-        KikuAudioStream.scriptNode = this.audioContext.createScriptProcessor(1024, 1, 1);
-        KikuAudioStream.mediaStreamSourceNode = this.audioContext.createMediaStreamSource(stream);
+        KikuAudioStream.scriptNode = KikuAudioStream.audioContext.createScriptProcessor(1024, 1, 1);
+        KikuAudioStream.mediaStreamSourceNode = KikuAudioStream.audioContext.createMediaStreamSource(stream);
         // Callback for script processor function
         KikuAudioStream.scriptNode.onaudioprocess = function (event) {
             // Add onto recorded data when set to true
@@ -644,7 +645,7 @@ KikuAudioStream.activeBuffer = new Float32Array(1);
 KikuAudioStream.recordedBuffer = new Float32Array(1);
 KikuAudioStream.startedRecording = () => { };
 KikuAudioStream.finishedRecording = () => { };
-KikuAudioStream.audioContext = new AudioContext() || window.webkitAudioContext();
+KikuAudioStream.audioContext = new AudioContext();
 KikuAudioStream.supported = false;
 KikuAudioStream.resetAudioBuffer = false;
 exports.KikuAudioStream = KikuAudioStream;

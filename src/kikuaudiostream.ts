@@ -12,7 +12,7 @@ export class KikuAudioStream {
     public static startedRecording: Function = () => {};
     public static finishedRecording: Function = () => {};
 
-    static audioContext: AudioContext = new AudioContext() || (<any>window).webkitAudioContext();
+    static audioContext: AudioContext = new AudioContext();
     static scriptNode?: ScriptProcessorNode;
     static mediaStreamSourceNode?: MediaStreamAudioSourceNode;
 
@@ -28,6 +28,8 @@ export class KikuAudioStream {
      * @public
      */
     public static setup () {
+
+        KikuAudioStream.audioContext = new AudioContext() || (<any>window).webkitAudioContext();
 
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 
@@ -116,8 +118,8 @@ export class KikuAudioStream {
         this.micRecorder = new MediaRecorder(stream);
 
         // Create live audio context processing
-        KikuAudioStream.scriptNode = this.audioContext.createScriptProcessor(1024, 1, 1);
-        KikuAudioStream.mediaStreamSourceNode = this.audioContext.createMediaStreamSource(stream);
+        KikuAudioStream.scriptNode = KikuAudioStream.audioContext.createScriptProcessor(1024, 1, 1);
+        KikuAudioStream.mediaStreamSourceNode = KikuAudioStream.audioContext.createMediaStreamSource(stream);
 
         // Callback for script processor function
         KikuAudioStream.scriptNode.onaudioprocess = function(event) {
