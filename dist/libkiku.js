@@ -119,17 +119,21 @@ class Kiku {
      * @param serverPort : Server port
      * @param serverPath : Peerjs server path
      */
-    static connectToServer(name, serverAddr, serverPort, serverPath) {
+    static connectToServer(name, serverAddr, serverPort, serverPath, secure) {
         // Setup properties
         Kiku.myname = name;
         Kiku.serverAddr = serverAddr;
         Kiku.serverPort = serverPort;
         Kiku.serverPath = serverPath;
+        if (secure === undefined) {
+            secure = false;
+        }
         // Format for peerjs
         let serverInfo = {
             host: Kiku.serverAddr,
             port: Kiku.serverPort,
-            path: Kiku.serverPath
+            path: Kiku.serverPath,
+            secure: secure
         };
         // Connect to server
         Kiku.peer = new Kiku.peerjs(Kiku.myname, serverInfo);
@@ -186,7 +190,10 @@ class Kiku {
      * @param deviceName : Device to request synchronized recording
      * @param fromNow : Number of miliseconds to start from now
      */
-    static async startRecording(deviceName, fromNow) {
+    static async startRecording(deviceName, fromNow, allowanceTime) {
+        if (allowanceTime !== undefined) {
+            Kiku.flightAllowanceTime = allowanceTime;
+        }
         Kiku.currentMaster = true;
         Kiku.inRecordingFlight = true;
         Kiku.activeConn = Kiku.findIndexOfDevice(deviceName);
@@ -253,9 +260,9 @@ class Kiku {
     static onStartRecording() {
         if (Kiku.currentMaster !== true) {
             console.log('onStartRecording entering send message');
-            Kiku.ourRecordingStart = Kiku.currentTime();
             let message = new MessageData(MessageType.STARTED_RECORDING);
             if (Kiku.peerConnStack[Kiku.activeConn].open) {
+                Kiku.ourRecordingStart = Kiku.currentTime();
                 console.log('Sending message of start recording', message);
                 PeerConnection.sendData(Kiku.peerConnStack[Kiku.activeConn], message);
             }
@@ -322,6 +329,7 @@ class Kiku {
                 });
                 break;
             case (MessageType.STARTED_RECORDING):
+                console.log('Started recording message received, updating recording offset...');
                 Kiku.theirRecordingStart = Kiku.currentTime();
                 Kiku.updateRecordingDelayTime();
                 break;
@@ -379,7 +387,8 @@ class Kiku {
      * @private
      */
     static updateRecordingDelayTime() {
-        Kiku.recordingDelayTime = Math.abs(Kiku.ourRecordingStart - Kiku.theirRecordingStart) / 2;
+        Kiku.recordingDelayTime = Math.abs(Kiku.ourRecordingStart - Kiku.theirRecordingStart) / 2000;
+        console.log('Recording offset updated to: ' + Kiku.recordingDelayTime);
     }
 }
 Kiku.activeConn = 0;
@@ -387,8 +396,8 @@ Kiku.flightAllowanceTime = 1000;
 Kiku.networkDelayTime = 10;
 Kiku.recordingDelayTime = 0;
 Kiku.ourRecordingStart = Kiku.currentTime();
-Kiku.theirRecordingStart = Kiku.currentTime();
-Kiku.recordDuration = 2500;
+Kiku.theirRecordingStart = Kiku.ourRecordingStart;
+Kiku.recordDuration = 1000;
 Kiku.buffersReady = false;
 Kiku.ourBuffer = new Float32Array(1);
 Kiku.theirBuffer = new Float32Array(1);
@@ -577,6 +586,8 @@ class KikuAudioStream {
      * @param duration : Duration to record for (ms)
      */
     static async recordAt(time, duration) {
+        // Reset buffer before attempting to record
+        KikuAudioStream.clearAudioBuffer();
         // Estimate execution time
         let eta_ms = time - KikuAudioStream.currentTime();
         console.log('Starting to record in ' + eta_ms + ' from now (' + eta_ms / 1000 + ')');
@@ -638,6 +649,9 @@ class KikuAudioStream {
      */
     static currentTime() {
         return performance.timing.navigationStart + performance.now();
+    }
+    static clearAudioBuffer() {
+        KikuAudioStream.resetAudioBuffer = true;
     }
 }
 KikuAudioStream.isRecording = false;
