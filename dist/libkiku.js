@@ -222,7 +222,7 @@ class Kiku {
                 else {
                     let results = {
                         currentDeviceBuffer: Kiku.ourBuffer,
-                        requestedDeviceBuffer: Kiku.theirBuffer,
+                        requestedDeviceBuffer: new Float32Array(Kiku.theirBuffer),
                         recordingDelay: Kiku.recordingDelayTime,
                         networkDelay: Kiku.networkDelayTime
                     };
