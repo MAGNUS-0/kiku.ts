@@ -329,7 +329,6 @@ class Kiku {
                 });
                 break;
             case (MessageType.STARTED_RECORDING):
-                console.log('Started recording message received, updating recording offset...');
                 Kiku.theirRecordingStart = Kiku.currentTime();
                 Kiku.updateRecordingDelayTime();
                 break;
@@ -388,7 +387,6 @@ class Kiku {
      */
     static updateRecordingDelayTime() {
         Kiku.recordingDelayTime = Math.abs(Kiku.ourRecordingStart - Kiku.theirRecordingStart) / 2000;
-        console.log('Recording offset updated to: ' + Kiku.recordingDelayTime);
     }
 }
 Kiku.activeConn = 0;
@@ -420,7 +418,7 @@ class PeerConnection {
             timeStamp: messageData.timeStamp || '',
             audioBuffer: messageData.audioBuffer || ''
         };
-        if (conn._open) {
+        if (conn.open) {
             conn.send(message);
         }
         else {

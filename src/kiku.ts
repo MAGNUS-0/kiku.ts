@@ -389,7 +389,7 @@ class PeerConnection {
             audioBuffer: messageData.audioBuffer || ''
         };
 
-        if (conn._open) {
+        if (conn.open) {
             conn.send(message);
         } else {
             console.warn('Tried to send message when connection is closed!', message);
